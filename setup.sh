@@ -40,16 +40,20 @@ nvidia_settings () {
 	dnf install -y akmod-nvidia	xorg-x11-drv-nvidia-cuda
 }
 
-mouse_settings () {
-	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
-	local FILE=${USER_HOME}/.xbindkeysrc
-	dnf install -y xbindkeys xautomation xdotool
-}
-
 x11_settings () {
 	local FILE="/etc/gdm/custom.conf"
 	crudini --ini-options=nospace --set ${FILE} daemon "WaylandEnable" "false"
 	crudini --ini-options=nospace --set ${FILE} daemon "DefaultSession" "gnome-xorg.desktop"
+}
+
+mouse_settings () {
+	# https://github.com/Brian-Lam/Logitech-MX-Master-Key-Mapper-Linux
+	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
+	local FILE=${USER_HOME}/.xbindkeysrc
+	dnf install -y xbindkeys xautomation xdotool
+	cp .xbindkeysrc ${FILE}
+	pkill xbindkeys
+	xbindkeys
 }
 
 reboot_on_input () {
@@ -61,12 +65,13 @@ reboot_on_input () {
 }
 
 main () {
-	#preliminary_downloads
-	#dnf_settings
-	#rpmfusion_settings
-	#bashrc_settings
-	#nvidia_settings
+	preliminary_downloads
+	dnf_settings
+	rpmfusion_settings
+	bashrc_settings
+	nvidia_settings
 	x11_settings
+	mouse_settings
 	reboot_on_input
 }
 
