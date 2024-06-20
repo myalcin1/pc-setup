@@ -2,10 +2,14 @@
 
 set -ex
 
-add_to_file_if_not_in () {
-	local FILE=$1
-	local LINE=$2
-	grep ${FILE} -e "^${LINE}$" 1>/dev/null || echo "${LINE}" >> ${FILE}
+main () {
+	preliminary_downloads
+	dnf_settings
+	rpmfusion_settings
+	bashrc_settings
+	nvidia_settings
+	mouse_settings
+	reboot_on_input
 }
 
 preliminary_downloads () {
@@ -40,12 +44,6 @@ nvidia_settings () {
 	dnf install -y akmod-nvidia	xorg-x11-drv-nvidia-cuda
 }
 
-x11_settings () {
-	local FILE="/etc/gdm/custom.conf"
-	crudini --ini-options=nospace --set ${FILE} daemon "WaylandEnable" "false"
-	crudini --ini-options=nospace --set ${FILE} daemon "DefaultSession" "gnome-xorg.desktop"
-}
-
 mouse_settings () {
 	# https://github.com/Brian-Lam/Logitech-MX-Master-Key-Mapper-Linux
 	x11_settings
@@ -55,8 +53,20 @@ mouse_settings () {
 	cp .xbindkeysrc ${FILE}
 	pkill xbindkeys
 	xbindkeys
-	mkdir -p ${USER_HOME}/.config/autostart
-	cp xbindkeys.desktop ${USER_HOME}/.config/autostart
+	autostart_xbindkeys
+}
+
+x11_settings () {
+	local FILE="/etc/gdm/custom.conf"
+	crudini --ini-options=nospace --set ${FILE} daemon "WaylandEnable" "false"
+	crudini --ini-options=nospace --set ${FILE} daemon "DefaultSession" "gnome-xorg.desktop"
+}
+
+autostart_xbindkeys () {
+	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
+	local DIRECTORY=${USER_HOME}/.config/autostart
+	mkdir -p ${DIRECTORY}
+	cp xbindkeys.desktop ${DIRECTORY}
 }
 
 reboot_on_input () {
@@ -67,14 +77,10 @@ reboot_on_input () {
 		&& reboot
 }
 
-main () {
-	preliminary_downloads
-	dnf_settings
-	rpmfusion_settings
-	bashrc_settings
-	nvidia_settings
-	mouse_settings
-	reboot_on_input
+add_to_file_if_not_in () {
+	local FILE=$1
+	local LINE=$2
+	grep ${FILE} -e "^${LINE}$" 1>/dev/null || echo "${LINE}" >> ${FILE}
 }
 
 if [ `id -u` -ne 0 ]
