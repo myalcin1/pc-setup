@@ -6,9 +6,13 @@ main () {
 	preliminary_downloads
 	dnf_settings
 	rpmfusion_settings
+	snap_settings
+	flatpak_settings
 	bashrc_settings
 	nvidia_settings
 	mouse_settings
+	ide_installations
+	dev_tools_installations
 	reboot_on_input
 }
 
@@ -29,6 +33,17 @@ rpmfusion_settings () {
 	dnf -y install fedora-workstation-repositories
 	dnf -y config-manager --enable google-chrome
 	dnf -y update
+}
+
+snap_settings () {
+	dnf install -y snapd
+	ln -s /var/lib/snapd/snap /snap
+	systemctl restart snapd snapd.socket
+	systemctl daemon-reload
+}
+
+flatpak_settings () {
+	dnf install -y flatpak
 }
 
 bashrc_settings () {
@@ -67,6 +82,14 @@ autostart_xbindkeys () {
 	local DIRECTORY=${USER_HOME}/.config/autostart
 	mkdir -p ${DIRECTORY}
 	cp xbindkeys.desktop ${DIRECTORY}
+}
+
+ide_installations () {
+	snap install --classic code pycharm-professional intellij-idea-ultimate clion
+}
+
+dev_tools_installations () {
+	dnf -y install java-latest-openjdk-devel gcc gcc-c++ python3
 }
 
 reboot_on_input () {
