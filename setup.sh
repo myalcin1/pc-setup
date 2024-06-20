@@ -48,12 +48,15 @@ x11_settings () {
 
 mouse_settings () {
 	# https://github.com/Brian-Lam/Logitech-MX-Master-Key-Mapper-Linux
+	x11_settings
 	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
 	local FILE=${USER_HOME}/.xbindkeysrc
 	dnf install -y xbindkeys xautomation xdotool
 	cp .xbindkeysrc ${FILE}
 	pkill xbindkeys
 	xbindkeys
+	mkdir -p ${USER_HOME}/.config/autostart
+	cp xbindkeys.desktop ${USER_HOME}/.config/autostart
 }
 
 reboot_on_input () {
@@ -70,7 +73,6 @@ main () {
 	rpmfusion_settings
 	bashrc_settings
 	nvidia_settings
-	x11_settings
 	mouse_settings
 	reboot_on_input
 }

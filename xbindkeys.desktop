@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=xbindkeys
+GenericName=Key Binder
+Exec=/usr/bin/xbindkeys
+Terminal=false
+Type=Application
+StartupNotify=false
+X-GNOME-Autostart-enabled=true
