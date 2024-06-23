@@ -13,6 +13,7 @@ main () {
 	mouse_settings
 	ide_installations
 	dev_tools_installations
+	general_tools_installations
 	reboot_on_input
 }
 
@@ -38,6 +39,7 @@ rpmfusion_settings () {
 snap_settings () {
 	dnf install -y snapd
 	ln -s /var/lib/snapd/snap /snap
+	snap install snap-store
 	systemctl restart snapd snapd.socket
 	systemctl daemon-reload
 }
@@ -90,6 +92,11 @@ ide_installations () {
 
 dev_tools_installations () {
 	dnf -y install java-latest-openjdk-devel gcc gcc-c++ python3
+}
+
+general_tools_installations () {
+	dnf install -y google-chrome-stable
+	flatpak install -y com.discordapp.Discord com.opera.Opera
 }
 
 reboot_on_input () {
