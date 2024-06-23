@@ -14,6 +14,8 @@ main () {
 	ide_installations
 	dev_tools_installations
 	general_tools_installations
+	prompt_settings
+	vim_settings
 	reboot_on_input
 }
 
@@ -65,9 +67,8 @@ mouse_settings () {
 	# https://github.com/Brian-Lam/Logitech-MX-Master-Key-Mapper-Linux
 	x11_settings
 	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
-	local FILE=${USER_HOME}/.xbindkeysrc
 	dnf install -y xbindkeys xautomation xdotool
-	cp .xbindkeysrc ${FILE}
+	cp xbindkeysrc ${USER_HOME}/.xbindkeysrc
 	pkill xbindkeys
 	xbindkeys
 	autostart_xbindkeys
@@ -97,6 +98,18 @@ dev_tools_installations () {
 general_tools_installations () {
 	dnf install -y google-chrome-stable
 	flatpak install -y com.discordapp.Discord com.opera.Opera
+}
+
+prompt_settings () {
+	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
+	local FILE=${USER_HOME}/.bashrc
+	cp promptrc ${USER_HOME}/.promptrc
+	add_to_file_if_not_in ${FILE} "source .promptrc"
+}
+
+vim_settings () {
+	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
+	cp .vimrc ${USER_HOME}/.vimrc
 }
 
 reboot_on_input () {
