@@ -20,7 +20,8 @@ main () {
 }
 
 preliminary_downloads () {
-	dnf -y install crudini
+	dnf -y update
+	dnf -y install crudini gnome-tweaks
 }
 
 dnf_settings () {
@@ -110,6 +111,10 @@ prompt_settings () {
 vim_settings () {
 	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
 	cp .vimrc ${USER_HOME}/.vimrc
+}
+
+gnome_tweaks_installation_and_settings() {
+	gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,close'
 }
 
 reboot_on_input () {

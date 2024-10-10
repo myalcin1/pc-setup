@@ -1,0 +1,252 @@
+SCM_THEME_PROMPT_DIRTY=' ✗'
+SCM_THEME_PROMPT_CLEAN=' ✓'
+SCM_THEME_PROMPT_PREFIX=' |'
+SCM_THEME_PROMPT_SUFFIX='|'
+SCM_THEME_BRANCH_PREFIX=''
+SCM_THEME_TAG_PREFIX='tag:'
+SCM_THEME_DETACHED_PREFIX='detached:'
+SCM_THEME_BRANCH_TRACK_PREFIX=' → '
+SCM_THEME_BRANCH_GONE_PREFIX=' ⇢ '
+SCM_THEME_CURRENT_USER_PREFFIX=' ☺︎ '
+SCM_THEME_CURRENT_USER_SUFFIX=''
+SCM_THEME_CHAR_PREFIX="${_prompt_bold_green}"
+SCM_THEME_CHAR_SUFFIX="${_prompt_normal}"
+
+SCM_GIT='git'
+SCM_GIT_CHAR='±'
+SCM_GIT_DETACHED_CHAR='⌿'
+SCM_GIT_AHEAD_CHAR="↑"
+SCM_GIT_BEHIND_CHAR="↓"
+SCM_GIT_UNTRACKED_CHAR="?:"
+SCM_GIT_UNSTAGED_CHAR="U:"
+SCM_GIT_STAGED_CHAR="S:"
+
+SCM_THEME_PROMPT_DIRTY=" ${_prompt_brown}✗"
+SCM_THEME_PROMPT_CLEAN=" ${_prompt_bold_green}✓"
+SCM_THEME_PROMPT_PREFIX=" |"
+SCM_THEME_PROMPT_SUFFIX="${_prompt_green}|"
+
+GIT_THEME_PROMPT_DIRTY=" ${_prompt_brown}✗"
+GIT_THEME_PROMPT_CLEAN=" ${_prompt_bold_green}✓"
+GIT_THEME_PROMPT_PREFIX=" ${_prompt_green}|"
+GIT_THEME_PROMPT_SUFFIX="${_prompt_green}|"
+
+SCM_NONE='NONE'
+SCM_NONE_CHAR='○'
+
+function scm_char {
+  scm_prompt_char
+  echo -e "${SCM_THEME_CHAR_PREFIX}${SCM_CHAR}${SCM_THEME_CHAR_SUFFIX}"
+}
+
+function scm_prompt_char {
+  if [[ -z $SCM ]]; then scm; fi
+  if [[ $SCM == $SCM_GIT ]]; then SCM_CHAR=$SCM_GIT_CHAR
+  else SCM_CHAR=$SCM_NONE_CHAR
+  fi
+}
+
+function scm {
+  if [[ "$SCM_CHECK" = false ]]; then SCM=$SCM_NONE
+  elif [[ -f .git/HEAD ]]; then SCM=$SCM_GIT
+  elif _omb_util_binary_exists git && [[ -n "$(_omb_prompt_git rev-parse --is-inside-work-tree 2> /dev/null)" ]]; then SCM=$SCM_GIT
+  elif [[ -d .hg ]]; then SCM=$SCM_HG
+  elif _omb_util_binary_exists hg && [[ -n "$(command hg root 2> /dev/null)" ]]; then SCM=$SCM_HG
+  elif [[ -d .svn ]]; then SCM=$SCM_SVN
+  else SCM=$SCM_NONE
+  fi
+}  
+
+function _omb_util_command_exists {
+  type -t -- "$@" &>/dev/null # bash-4.0
+}
+
+function _omb_util_binary_exists {
+  type -P -- "$@" &>/dev/null # bash-4.0
+}
+
+function _omb_prompt_git {
+  command git "$@"
+}
+
+function scm_prompt_info {
+  scm
+  scm_prompt_char
+  scm_prompt_info_common
+}
+
+function scm_prompt_info_common {
+  SCM_DIRTY=0
+  SCM_STATE=''
+
+  if [[ ${SCM} == ${SCM_GIT} ]]; then
+    git_prompt_minimal_info
+    #git_prompt_info
+    return
+  fi
+}
+
+function git_prompt_minimal_info {
+  local ref
+  local status
+  local git_status_flags=('--porcelain')
+  SCM_STATE=${SCM_THEME_PROMPT_CLEAN}
+
+  if _omb_prompt_git_status_enabled; then
+    # Get the branch reference
+    ref=$(git_clean_branch) || \
+    ref=$(_omb_prompt_git rev-parse --short HEAD 2> /dev/null) || return 0
+    SCM_BRANCH=${SCM_THEME_BRANCH_PREFIX}${ref}
+
+    # Get the status
+    [[ "${SCM_GIT_IGNORE_UNTRACKED}" = "true" ]] && git_status_flags+='-untracked-files=no'
+    status=$(_omb_prompt_git status ${git_status_flags} 2> /dev/null | tail -n1)
+
+    if [[ -n ${status} ]]; then
+      SCM_DIRTY=1
+      SCM_STATE=${SCM_THEME_PROMPT_DIRTY}
+    fi
+
+    # Output the git prompt
+    SCM_PREFIX=${SCM_THEME_PROMPT_PREFIX}
+    SCM_SUFFIX=${SCM_THEME_PROMPT_SUFFIX}
+    echo -e "${SCM_PREFIX}${SCM_BRANCH}${SCM_STATE}${SCM_SUFFIX}"
+  fi
+}
+
+function _omb_prompt_git_status_enabled {
+  [[ $(_omb_prompt_git config --get-regexp '^(oh-my-zsh|bash-it|oh-my-bash)\.hide-status$' |
+    awk '$2== "1" {hide_status = 1;} END { print hide_status; }') != "1" ]]
+}
+
+function git_clean_branch {
+  local unsafe_ref=$(_omb_prompt_git symbolic-ref -q HEAD 2> /dev/null)
+  local stripped_ref=${unsafe_ref##refs/heads/}
+  local clean_ref=${stripped_ref//[\$\`\\]/-}
+  clean_ref=${clean_ref//[^[:print:]]/-} # strip escape sequences, etc.
+  echo $clean_ref
+}
+
+function git_prompt_info {
+  git_prompt_vars
+  echo -e "$SCM_PREFIX$SCM_BRANCH$SCM_STATE$SCM_GIT_AHEAD$SCM_GIT_BEHIND$SCM_GIT_STASH$SCM_SUFFIX"
+  #echo -e "-$SCM_PREFIX-$SCM_BRANCH-$SCM_STATE-$SCM_GIT_AHEAD-$SCM_GIT_BEHIND-$SCM_GIT_STASH-$SCM_SUFFIX-"
+}
+
+function git_prompt_vars {
+  local details=''
+  local git_status_flags=''
+  [[ "$(_omb_prompt_git rev-parse --is-inside-work-tree 2> /dev/null)" == "true" ]] || return 1
+  SCM_STATE=${GIT_THEME_PROMPT_CLEAN:-$SCM_THEME_PROMPT_CLEAN}
+  if _omb_prompt_git_status_enabled; then
+    [[ "${SCM_GIT_IGNORE_UNTRACKED}" = "true" ]] && git_status_flags='-uno'
+    local status_lines=$((_omb_prompt_git status --porcelain ${git_status_flags} -b 2> /dev/null ||
+                          _omb_prompt_git status --porcelain ${git_status_flags}    2> /dev/null) | git_status_summary)
+    local status=$(awk 'NR==1' <<< "$status_lines")
+    local counts=$(awk 'NR==2' <<< "$status_lines")
+    IFS=$'\t' read -r untracked_count unstaged_count staged_count <<< "$counts"
+    if [[ "${untracked_count}" -gt 0 || "${unstaged_count}" -gt 0 || "${staged_count}" -gt 0 ]]; then
+      if [[ "${SCM_GIT_SHOW_DETAILS}" = "true" ]]; then
+        [[ "${staged_count}" -gt 0 ]] && details+=" ${SCM_GIT_STAGED_CHAR}${staged_count}" && SCM_DIRTY=3
+        [[ "${unstaged_count}" -gt 0 ]] && details+=" ${SCM_GIT_UNSTAGED_CHAR}${unstaged_count}" && SCM_DIRTY=2
+        [[ "${untracked_count}" -gt 0 ]] && details+=" ${SCM_GIT_UNTRACKED_CHAR}${untracked_count}" &&
+          [[ "$SCM_GIT_DISABLE_UNTRACKED_DIRTY" != "true" ]] && SCM_DIRTY=1
+      fi
+      [[ "$SCM_GIT_DISABLE_UNTRACKED_DIRTY" != "true" || "${unstaged_count}" -gt 0 || "${staged_count}" -gt 0 ]] &&
+        SCM_STATE=${GIT_THEME_PROMPT_DIRTY:-$SCM_THEME_PROMPT_DIRTY}
+    fi
+  fi
+
+  [[ "${SCM_GIT_SHOW_CURRENT_USER}" == "true" ]] && details+="$(git_user_info)"
+
+  SCM_CHANGE=$(_omb_prompt_git rev-parse --short HEAD 2>/dev/null)
+
+  local ref=$(git_clean_branch)
+
+  if [[ -n "$ref" ]]; then
+    SCM_BRANCH="${SCM_THEME_BRANCH_PREFIX}${ref}"
+    local tracking_info="$(grep -- "${SCM_BRANCH}\.\.\." <<< "${status}")"
+    if [[ -n "${tracking_info}" ]]; then
+      [[ "${tracking_info}" =~ .+\[gone\]$ ]] && local branch_gone="true"
+      tracking_info=${tracking_info#\#\# ${SCM_BRANCH}...}
+      tracking_info=${tracking_info% [*}
+      local remote_name=${tracking_info%%/*}
+      local remote_branch=${tracking_info#${remote_name}/}
+      local remote_info=""
+      local num_remotes=$(_omb_prompt_git remote | wc -l 2> /dev/null)
+      [[ "${SCM_BRANCH}" = "${remote_branch}" ]] && local same_branch_name=true
+      if ([[ "${SCM_GIT_SHOW_REMOTE_INFO}" = "auto" ]] && [[ "${num_remotes}" -ge 2 ]]) ||
+          [[ "${SCM_GIT_SHOW_REMOTE_INFO}" = "true" ]]; then
+        remote_info="${remote_name}"
+        [[ "${same_branch_name}" != "true" ]] && remote_info+="/${remote_branch}"
+      elif [[ ${same_branch_name} != "true" ]]; then
+        remote_info="${remote_branch}"
+      fi
+      if [[ -n "${remote_info}" ]];then
+        if [[ "${branch_gone}" = "true" ]]; then
+          SCM_BRANCH+="${SCM_THEME_BRANCH_GONE_PREFIX}${remote_info}"
+        else
+          SCM_BRANCH+="${SCM_THEME_BRANCH_TRACK_PREFIX}${remote_info}"
+        fi
+      fi
+    fi
+    SCM_GIT_DETACHED="false"
+  else
+    local detached_prefix=""
+    ref=$(_omb_prompt_git describe --tags --exact-match 2> /dev/null)
+    if [[ -n "$ref" ]]; then
+      detached_prefix=${SCM_THEME_TAG_PREFIX}
+    else
+      ref=$(_omb_prompt_git describe --contains --all HEAD 2> /dev/null)
+      ref=${ref#remotes/}
+      [[ -z "$ref" ]] && ref=${SCM_CHANGE}
+      detached_prefix=${SCM_THEME_DETACHED_PREFIX}
+    fi
+    SCM_BRANCH=${detached_prefix}${ref}
+    SCM_GIT_DETACHED="true"
+  fi
+
+  local ahead_re='.+ahead ([0-9]+).+'
+  local behind_re='.+behind ([0-9]+).+'
+  [[ "${status}" =~ ${ahead_re} ]] && SCM_BRANCH+=" ${SCM_GIT_AHEAD_CHAR}${BASH_REMATCH[1]}"
+  [[ "${status}" =~ ${behind_re} ]] && SCM_BRANCH+=" ${SCM_GIT_BEHIND_CHAR}${BASH_REMATCH[1]}"
+
+  local stash_count="$(_omb_prompt_git stash list 2> /dev/null | wc -l | tr -d ' ')"
+  [[ "${stash_count}" -gt 0 ]] && SCM_BRANCH+=" {${stash_count}}"
+
+  SCM_BRANCH+=${details}
+
+  SCM_PREFIX=${GIT_THEME_PROMPT_PREFIX:-$SCM_THEME_PROMPT_PREFIX}
+  SCM_SUFFIX=${GIT_THEME_PROMPT_SUFFIX:-$SCM_THEME_PROMPT_SUFFIX}
+}
+
+function git_status_summary {
+  awk '
+  BEGIN {
+    untracked=0;
+    unstaged=0;
+    staged=0;
+  }
+  {
+    if (!after_first && $0 ~ /^##.+/) {
+      print $0
+      seen_header = 1
+    } else if ($0 ~ /^\?\? .+/) {
+      untracked += 1
+    } else {
+      if ($0 ~ /^.[^ ] .+/) {
+        unstaged += 1
+      }
+      if ($0 ~ /^[^ ]. .+/) {
+        staged += 1
+      }
+    }
+    after_first = 1
+  }
+  END {
+    if (!seen_header) {
+      print
+    }
+    print untracked "\t" unstaged "\t" staged
+  }'
+}

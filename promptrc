@@ -16,6 +16,9 @@ function _prompt_color_initialize {
     done
 }
 
+_prompt_color_initialize
+source ~/.prompt_gitrc
+
 function _general_options {
   shopt -s checkwinsize
   PROMPT_DIRTRIM=4
@@ -55,17 +58,26 @@ function ps_username {
   esac
 }
 
+function my_ps_git {
+  local CHAR=$(scm_char)
+  if [[ $CHAR == "$SCM_NONE_CHAR" ]]; then
+    return
+  else
+    echo "[${CHAR}][$(scm_prompt_info)]"
+  fi
+}
+
 function _theme_PROMPT_COMMAND {
   local my_ps_host="${_prompt_green}\h${_prompt_normal}"
   local my_ps_wdir="${_prompt_teal}\w${_prompt_normal}"
 
   PS1="
-${TITLEBAR}┌─$(my_ve)$(ps_username)[$my_ps_host][$my_ps_wdir]$(is_vim_shell)
-└─▪ "
+${TITLEBAR}┌─$(my_ve)$(ps_username)[${my_ps_host}]\$(my_ps_git)[$my_ps_wdir]$(is_vim_shell)
+└─▪$ "
+  PS2="└─▪ "
 }
 
-PS2="└─▪ "
 
-_prompt_color_initialize
+#_prompt_color_initialize
 _general_options
 _theme_PROMPT_COMMAND
