@@ -1,23 +1,20 @@
 function _prompt_color_initialize {
-    _prompt_normal='\[\e[0m\]'
+    _prompt_normal='\e[0m'
     local -a normal_colors=(black brown green olive navy purple teal silver)
     local -a bright_colors=(gray red lime yellow blue magenta cyan white)
     local bright_fg_prefix=9 bright_bg_prefix=10
     local index
     for (( index = 0; index < 8; index++ )); do
-        printf -v "_prompt_${normal_colors[index]}" %s '\[\e[0;3'"${index}"'m\]'
-        printf -v "_prompt_bold_${normal_colors[index]}" %s '\[\e[3'"$index"';1m\]'
-        printf -v "_prompt_underline_${normal_colors[index]}" %s '\[\e[3'"$index"';4m\]'
-        printf -v "_prompt_background_${normal_colors[index]}" %s '\[\e[4'"$index"'m\]'
-        printf -v "_prompt_${bright_colors[index]}" %s '\[\e[0;'"$bright_fg_prefix$index"'m\]'
-        printf -v "_prompt_bold_${bright_colors[index]}" %s '\[\e['"$bright_fg_prefix$index"';1m\]'
-        printf -v "_prompt_underline_${bright_colors[index]}" %s '\[\e['"$bright_fg_prefix$index"';4m\]'
-        printf -v "_prompt_background_${bright_colors[index]}" %s '\[\e['"$bright_bg_prefix$index"'m\]'
+        printf -v "_prompt_${normal_colors[index]}" %s '\e[0;3'"${index}"'m'
+        printf -v "_prompt_bold_${normal_colors[index]}" %s '\e[3'"$index"';1m'
+        printf -v "_prompt_underline_${normal_colors[index]}" %s '\e[3'"$index"';4m'
+        printf -v "_prompt_background_${normal_colors[index]}" %s '\e[4'"$index"'m'
+        printf -v "_prompt_${bright_colors[index]}" %s '\e[0;'"$bright_fg_prefix$index"'m'
+        printf -v "_prompt_bold_${bright_colors[index]}" %s '\e['"$bright_fg_prefix$index"';1m'
+        printf -v "_prompt_underline_${bright_colors[index]}" %s '\e['"$bright_fg_prefix$index"';4m'
+        printf -v "_prompt_background_${bright_colors[index]}" %s '\e['"$bright_bg_prefix$index"'m'
     done
 }
-
-_prompt_color_initialize
-source ~/.prompt_gitrc
 
 function _general_options {
   shopt -s checkwinsize
@@ -63,7 +60,7 @@ function my_ps_git {
   if [[ $CHAR == "$SCM_NONE_CHAR" ]]; then
     return
   else
-    echo "[${CHAR}][$(scm_prompt_info)]"
+    echo "[$(scm_colored_char)][$(scm_prompt_info)]"
   fi
 }
 
@@ -78,6 +75,8 @@ ${TITLEBAR}┌─$(my_ve)$(ps_username)[${my_ps_host}]\$(my_ps_git)[$my_ps_wdir]
 }
 
 
-#_prompt_color_initialize
+_prompt_color_initialize
+source ~/.prompt_gitrc
 _general_options
 _theme_PROMPT_COMMAND
+

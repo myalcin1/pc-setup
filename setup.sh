@@ -105,6 +105,7 @@ prompt_settings () {
 	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
 	local FILE=${USER_HOME}/.bashrc
 	cp promptrc ${USER_HOME}/.promptrc
+	cp prompt_gitrc ${USER_HOME}/.prompt_gitrc
 	add_to_file_if_not_in ${FILE} "source .promptrc"
 }
 

@@ -9,7 +9,7 @@ SCM_THEME_BRANCH_TRACK_PREFIX=' → '
 SCM_THEME_BRANCH_GONE_PREFIX=' ⇢ '
 SCM_THEME_CURRENT_USER_PREFFIX=' ☺︎ '
 SCM_THEME_CURRENT_USER_SUFFIX=''
-SCM_THEME_CHAR_PREFIX="${_prompt_bold_green}"
+SCM_THEME_CHAR_PREFIX="${_prompt_bold_olive}"
 SCM_THEME_CHAR_SUFFIX="${_prompt_normal}"
 
 SCM_GIT='git'
@@ -23,18 +23,23 @@ SCM_GIT_STAGED_CHAR="S:"
 
 SCM_THEME_PROMPT_DIRTY=" ${_prompt_brown}✗"
 SCM_THEME_PROMPT_CLEAN=" ${_prompt_bold_green}✓"
-SCM_THEME_PROMPT_PREFIX=" |"
-SCM_THEME_PROMPT_SUFFIX="${_prompt_green}|"
+SCM_THEME_PROMPT_PREFIX=""
+SCM_THEME_PROMPT_SUFFIX="${_prompt_normal}"
 
 GIT_THEME_PROMPT_DIRTY=" ${_prompt_brown}✗"
 GIT_THEME_PROMPT_CLEAN=" ${_prompt_bold_green}✓"
-GIT_THEME_PROMPT_PREFIX=" ${_prompt_green}|"
-GIT_THEME_PROMPT_SUFFIX="${_prompt_green}|"
+GIT_THEME_PROMPT_PREFIX=""
+GIT_THEME_PROMPT_SUFFIX=""
 
 SCM_NONE='NONE'
 SCM_NONE_CHAR='○'
 
 function scm_char {
+  scm_prompt_char
+  echo -e "${SCM_CHAR}"
+}
+
+function scm_colored_char {
   scm_prompt_char
   echo -e "${SCM_THEME_CHAR_PREFIX}${SCM_CHAR}${SCM_THEME_CHAR_SUFFIX}"
 }
@@ -80,8 +85,8 @@ function scm_prompt_info_common {
   SCM_STATE=''
 
   if [[ ${SCM} == ${SCM_GIT} ]]; then
-    git_prompt_minimal_info
-    #git_prompt_info
+    #git_prompt_minimal_info
+    git_prompt_info
     return
   fi
 }
