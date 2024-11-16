@@ -9,7 +9,7 @@ set fileencoding=utf-8
 set nocompatible
 "filetype off
 set wrap
-set number
+set number relativenumber
 
 inoremap jj <ESC>
 inoremap """ """"""<left><left><left>
