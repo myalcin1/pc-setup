@@ -16,6 +16,7 @@ main () {
 	general_tools_installations
 	prompt_settings
 	vim_settings
+	neovim_settings
 	reboot_on_input
 }
 
@@ -93,7 +94,7 @@ ide_installations () {
 }
 
 dev_tools_installations () {
-	dnf -y install java-latest-openjdk-devel gcc gcc-c++ python3
+	dnf -y install java-latest-openjdk-devel gcc gcc-c++ python3 cmake
 }
 
 general_tools_installations () {
@@ -110,8 +111,18 @@ prompt_settings () {
 }
 
 vim_settings () {
+	dnf install -y vim
 	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
 	cp .vimrc ${USER_HOME}/.vimrc
+}
+
+neovim_settings () {
+	dnf install -y neovim
+	dnf install -y fd-find
+	local USER_HOME=$(getent passwd ${SUDO_USER} | cut -d: -f6)
+	local DIRECTORY=${USER_HOME}/.config/nvim
+	mkdir -p ${DIRECTORY}
+	cp init.lua ${DIRECTORY}
 }
 
 gnome_tweaks_installation_and_settings() {
