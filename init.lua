@@ -40,18 +40,6 @@ vim.keymap.set("i", "{", "{}<left>")
 vim.keymap.set("i", "{<CR>", "{<CR>}<ESC>O")
 vim.keymap.set("i", "{;<CR>", "{<CR>};<ESC>O")
 
--- load the session for the current directory
-vim.keymap.set("n", "<leader>qs", function() require("persistence").load() end)
-
--- select a session to load
-vim.keymap.set("n", "<leader>qS", function() require("persistence").select() end)
-
--- load the last session
-vim.keymap.set("n", "<leader>ql", function() require("persistence").load({ last = true }) end)
-
--- stop Persistence => session won't be saved on exit
-vim.keymap.set("n", "<leader>qd", function() require("persistence").stop() end)
-
 vim.keymap.set("v", "J", ":m '>+1<CR>gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv")
 vim.keymap.set("n", "J", "mzJ`z")
@@ -63,12 +51,23 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
+vim.keymap.set("n", "<A-y>", "<C-w><")
+vim.keymap.set("n", "<A-u>", "<C-w>+")
+vim.keymap.set("n", "<A-ı>", "<C-w>-")
+vim.keymap.set("n", "<A-o>", "<C-w>>")
+
+vim.keymap.set("n", "<A-d>", ":%s/\\<<C-r><C-w>\\>//gI<Left><Left><Left>") -- learn
+vim.keymap.set("v", "<A-d>", "\"dy:%sno/<C-r>d//gI<Left><Left><Left>")     -- learn
+vim.keymap.set("v", "/", "\"dy/\\V<C-r>d<CR>")                             -- learn
+vim.keymap.set("v", "?", "\"dy/\\V<C-r>d\\c<CR>")                          -- learn
+
 vim.keymap.set("v", "<A-p>", "\"_dP")
 vim.keymap.set({"n", "v"}, "<leader>y", "\"+y")
 vim.keymap.set({"n", "v"}, "<leader>p", "\"+p")
 vim.keymap.set({"n", "v"}, "<leader>d", "\"_d")
 
 vim.keymap.set("t", "<ESC>", "<C-\\><C-N>")
+vim.keymap.set("t", "jj", "<C-\\><C-N>")
 vim.keymap.set("t", "<C-d>", "<C-\\><C-d>")
 
 -- plugins
@@ -150,7 +149,13 @@ local plugins = {
         config = true,
         dependencies = { "nvim-tree/nvim-web-devicons", opt = true },
     },
-    { "sindrets/diffview.nvim" },
+    {
+        "sindrets/diffview.nvim",
+        config = function ()
+            vim.keymap.set("n", "<A-g>", "<cmd> DiffviewOpen <CR>")
+            vim.keymap.set("n", "<A-G>", "<cmd> DiffviewClose <CR>")
+        end
+    },
     { "mg979/vim-visual-multi" },
     {
         "lukas-reineke/indent-blankline.nvim",
@@ -165,11 +170,42 @@ local plugins = {
             vim.keymap.set("n", "<leader>/", "<Plug>(comment_toggle_linewise_current)")
         end
     },
-    { "akinsho/toggleterm.nvim", version = "*", config = true },
+    {
+        "akinsho/toggleterm.nvim",
+        version = "*",
+        config = function ()
+            vim.keymap.set({"n", "t"}, "<A-m>", function () require("toggleterm").toggle(vim.v.count) end)
+        end
+    },
+    {
+        "romgrk/barbar.nvim",
+        opts = { mappings = false },
+        config = function ()
+            vim.keymap.set("n", "<A-j>", "<cmd> BufferPrevious <CR>")
+            vim.keymap.set("n", "<A-k>", "<cmd> BufferNext <CR>")
+            vim.keymap.set("n", "<A-J>", "<cmd> BufferMovePrevious <CR>")
+            vim.keymap.set("n", "<A-K>", "<cmd> BufferMoveNext <CR>")
+            vim.keymap.set("n", "<A-w>", "<cmd> BufferClose <CR>")
+            vim.keymap.set("n", "<A-1>", "<cmd> BufferGoto 1 <CR>")
+            vim.keymap.set("n", "<A-2>", "<cmd> BufferGoto 2 <CR>")
+            vim.keymap.set("n", "<A-3>", "<cmd> BufferGoto 3 <CR>")
+            vim.keymap.set("n", "<A-4>", "<cmd> BufferGoto 4 <CR>")
+            vim.keymap.set("n", "<A-5>", "<cmd> BufferGoto 5 <CR>")
+            vim.keymap.set("n", "<A-6>", "<cmd> BufferGoto 6 <CR>")
+            vim.keymap.set("n", "<A-7>", "<cmd> BufferGoto 7 <CR>")
+            vim.keymap.set("n", "<A-8>", "<cmd> BufferGoto 8 <CR>")
+            vim.keymap.set("n", "<A-9>", "<cmd> BufferGoto 9 <CR>")
+            vim.keymap.set("n", "<A-0>", "<cmd> BufferLast <CR>")
+        end
+    },
     {
         "folke/persistence.nvim",
         event = "BufReadPre",
-        config = true,
+        config = function ()
+            local persist = require("persistence")
+            vim.keymap.set("n", "<leader>ql", function () persist.load({ last = true }) end)  -- learn
+            vim.keymap.set("n", "<leader>qs", function () persist.load() end)                 -- learn
+        end,
     },
     {
         "hrsh7th/nvim-cmp",
@@ -230,6 +266,7 @@ local plugins = {
                     },
                 },
             })
+            vim.keymap.set("n", "<leader>F", vim.lsp.buf.format)
             vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
             vim.keymap.set("n", "gd", vim.lsp.buf.definition)
             vim.keymap.set("n", "gi", vim.lsp.buf.implementation)
