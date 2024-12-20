@@ -1,6 +1,5 @@
 -- settings
 vim.opt.number = true
-vim.opt.relativenumber = true
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
@@ -55,6 +54,11 @@ vim.keymap.set("n", "<A-y>", "<C-w><")
 vim.keymap.set("n", "<A-u>", "<C-w>+")
 vim.keymap.set("n", "<A-ı>", "<C-w>-")
 vim.keymap.set("n", "<A-o>", "<C-w>>")
+
+vim.keymap.set("n", "<C-h>", "<C-w>h")
+vim.keymap.set("n", "<C-j>", "<C-w>j")
+vim.keymap.set("n", "<C-k>", "<C-w>k")
+vim.keymap.set("n", "<C-l>", "<C-w>l")
 
 vim.keymap.set("n", "<A-d>", ":%s/\\<<C-r><C-w>\\>//gI<Left><Left><Left>") -- learn
 vim.keymap.set("v", "<A-d>", "\"dy:%sno/<C-r>d//gI<Left><Left><Left>")     -- learn
@@ -140,7 +144,9 @@ local plugins = {
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
             require("nvim-tree").setup()
+            local api = require("nvim-tree.api")
             vim.keymap.set("n", "<A-b>", "<cmd> NvimTreeToggle <CR>")
+            vim.keymap.set("n", "<A-I>", api.tree.toggle_gitignore_filter)
         end
     },
     { "lewis6991/gitsigns.nvim", config = true },
