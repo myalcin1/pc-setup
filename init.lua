@@ -66,9 +66,9 @@ vim.keymap.set("v", "/", "\"dy/\\V<C-r>d<CR>")                             -- le
 vim.keymap.set("v", "?", "\"dy/\\V<C-r>d\\c<CR>")                          -- learn
 
 vim.keymap.set("v", "<A-p>", "\"_dP")
+vim.keymap.set("v", "<A-d>", "\"_d")
 vim.keymap.set({"n", "v"}, "<leader>y", "\"+y")
 vim.keymap.set({"n", "v"}, "<leader>p", "\"+p")
-vim.keymap.set({"n", "v"}, "<leader>d", "\"_d")
 
 vim.keymap.set("t", "<ESC>", "<C-\\><C-N>")
 vim.keymap.set("t", "jj", "<C-\\><C-N>")
@@ -300,4 +300,3 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup(plugins, {})
-
