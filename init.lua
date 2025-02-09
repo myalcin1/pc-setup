@@ -52,7 +52,7 @@ vim.keymap.set("n", "N", "Nzzzv")
 
 vim.keymap.set("n", "<A-y>", "<C-w><")
 vim.keymap.set("n", "<A-u>", "<C-w>+")
-vim.keymap.set("n", "<A-ı>", "<C-w>-")
+vim.keymap.set("n", "<A-i>", "<C-w>-")
 vim.keymap.set("n", "<A-o>", "<C-w>>")
 
 vim.keymap.set("n", "<C-h>", "<C-w>h")
