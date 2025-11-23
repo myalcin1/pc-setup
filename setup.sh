@@ -27,8 +27,8 @@ preliminary_downloads () {
 
 dnf_settings () {
 	local FILE="/etc/dnf/dnf.conf"
-	crudini --ini-options=nospace --set ${FILE} daemon "fastestmirror" "True"
-	crudini --ini-options=nospace --set ${FILE} daemon "max_parallel_downloads" "10"
+	crudini --ini-options=nospace --set ${FILE} main "fastestmirror" "True"
+	crudini --ini-options=nospace --set ${FILE} main "max_parallel_downloads" "10"
 }
 
 rpmfusion_settings () {
