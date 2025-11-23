@@ -1,0 +1,35 @@
+separator=true
+separator_block_width=30
+
+[keyboard]
+command=./keyboard.sh
+interval=1
+signal=10
+
+[audio-signaling]
+full_text=
+command=pactl subscribe | stdbuf -oL grep change | while read -r line; do pkill --signal SIGRTMIN+10 -x i3blocks; done
+interval=persist
+
+[microphone]
+command=./microphone.sh
+interval=1
+signal=10
+markup=pango
+
+[volume]
+command=./volume.sh
+interval=1
+signal=10
+markup=pango
+
+[battery]
+command=./battery.sh
+interval=1
+signal=10
+markup=pango
+
+[time]
+command=date '+<span color="gray">%Y-%m-%d</span> %H:%M:%S'
+interval=1
+markup=pango
