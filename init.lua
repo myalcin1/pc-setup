@@ -14,10 +14,16 @@ vim.opt.undolevels = 0xffff
 vim.opt.smartindent = true
 vim.opt.wrap = false
 
-vim.opt.hlsearch = false
+-- vim.opt.hlsearch = false
+vim.opt.hlsearch = true
 vim.opt.incsearch = true
 
 vim.opt.termguicolors = true
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = {'javascript', 'typescript', 'html', 'css', 'scss', 'json', 'yaml', 'markdown'},
+    command = 'setlocal tabstop=2 shiftwidth=2'
+})
 
 -- remaps
 vim.g.mapleader = " "
@@ -50,6 +56,9 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz")
 vim.keymap.set("n", "n", "nzzzv")
 vim.keymap.set("n", "N", "Nzzzv")
 
+vim.keymap.set("n", "<A-r>", ":cnext<CR>")
+vim.keymap.set("n", "<A-e>", ":cprev<CR>")
+
 vim.keymap.set("n", "<A-y>", "<C-w><")
 vim.keymap.set("n", "<A-u>", "<C-w>+")
 vim.keymap.set("n", "<A-i>", "<C-w>-")
@@ -74,6 +83,28 @@ vim.keymap.set("t", "<ESC>", "<C-\\><C-N>")
 vim.keymap.set("t", "jj", "<C-\\><C-N>")
 vim.keymap.set("t", "<C-d>", "<C-\\><C-d>")
 
+-- terminal previous line
+_G.jump_to_prompt = function(forward)
+    local user = vim.fn.expand("$USER")
+    local host = vim.fn.hostname()
+    local pattern = string.format([[%s@%s]], vim.pesc(user), vim.pesc(host))
+    local found
+    if forward == true then
+        found = vim.fn.search(pattern, 'w')
+    else
+        found = vim.fn.search(pattern, 'bw')
+    end
+
+    if found ~= 0 then
+        print("Jumped to prompt at line " .. found)
+    else
+        print("No prompt in this buffer.")
+    end
+end
+
+vim.keymap.set('n', '<C-u>', [[<Cmd>lua jump_to_prompt(true)<CR>]], {noremap = true, silent = true})
+vim.keymap.set('n', '<C-i>', [[<Cmd>lua jump_to_prompt(false)<CR>]], {noremap = true, silent = true})
+
 -- plugins
 local plugins = {
     {
@@ -85,14 +116,14 @@ local plugins = {
             vim.cmd.colorscheme "catppuccin"
         end
     },
---    {
---        "navarasu/onedark.nvim",
---        opts = { style = "darker" },
---        priority = 1000,
---        config = function ()
---            vim.cmd.colorscheme("onedark")
---        end
---    },
+    -- {
+    --    "navarasu/onedark.nvim",
+    --    opts = { style = "darker" },
+    --    priority = 1000,
+    --    config = function ()
+    --        vim.cmd.colorscheme("onedark")
+    --    end
+    -- },
     {
         "nvim-telescope/telescope.nvim",
         tag = "0.1.6",
@@ -109,11 +140,12 @@ local plugins = {
         build = ":TSUpdate",
         config = function()
             require("nvim-treesitter.configs").setup({
-                ensure_installed = { "lua", "c", "cpp", "python", "markdown"},
+                ensure_installed = { "lua", "c", "cpp", "python", "markdown", "javascript"},
                 highlight = { enable = true }
             })
         end
     },
+    { "nvim-treesitter/nvim-treesitter-context" },
     {
         "mbbill/undotree",
         config = function()
@@ -192,16 +224,16 @@ local plugins = {
             vim.keymap.set("n", "<A-J>", "<cmd> BufferMovePrevious <CR>")
             vim.keymap.set("n", "<A-K>", "<cmd> BufferMoveNext <CR>")
             vim.keymap.set("n", "<A-w>", "<cmd> BufferClose <CR>")
-            vim.keymap.set("n", "<A-1>", "<cmd> BufferGoto 1 <CR>")
-            vim.keymap.set("n", "<A-2>", "<cmd> BufferGoto 2 <CR>")
-            vim.keymap.set("n", "<A-3>", "<cmd> BufferGoto 3 <CR>")
-            vim.keymap.set("n", "<A-4>", "<cmd> BufferGoto 4 <CR>")
-            vim.keymap.set("n", "<A-5>", "<cmd> BufferGoto 5 <CR>")
-            vim.keymap.set("n", "<A-6>", "<cmd> BufferGoto 6 <CR>")
-            vim.keymap.set("n", "<A-7>", "<cmd> BufferGoto 7 <CR>")
-            vim.keymap.set("n", "<A-8>", "<cmd> BufferGoto 8 <CR>")
-            vim.keymap.set("n", "<A-9>", "<cmd> BufferGoto 9 <CR>")
-            vim.keymap.set("n", "<A-0>", "<cmd> BufferLast <CR>")
+            -- vim.keymap.set("n", "<A-1>", "<cmd> BufferGoto 1 <CR>")
+            -- vim.keymap.set("n", "<A-2>", "<cmd> BufferGoto 2 <CR>")
+            -- vim.keymap.set("n", "<A-3>", "<cmd> BufferGoto 3 <CR>")
+            -- vim.keymap.set("n", "<A-4>", "<cmd> BufferGoto 4 <CR>")
+            -- vim.keymap.set("n", "<A-5>", "<cmd> BufferGoto 5 <CR>")
+            -- vim.keymap.set("n", "<A-6>", "<cmd> BufferGoto 6 <CR>")
+            -- vim.keymap.set("n", "<A-7>", "<cmd> BufferGoto 7 <CR>")
+            -- vim.keymap.set("n", "<A-8>", "<cmd> BufferGoto 8 <CR>")
+            -- vim.keymap.set("n", "<A-9>", "<cmd> BufferGoto 9 <CR>")
+            -- vim.keymap.set("n", "<A-0>", "<cmd> BufferLast <CR>")
         end
     },
     {
@@ -257,12 +289,25 @@ local plugins = {
                     "jsonls",
                     "pylsp",
                     "lua_ls",
+                    "ts_ls",
+                    "eslint",
+                    "html",
                 }
             })
             lspconfig["clangd"].setup({})
             lspconfig["cmake"].setup({})
             lspconfig["jsonls"].setup({})
-            lspconfig["pylsp"].setup({})
+            lspconfig["pylsp"].setup({
+                settings = {
+                    pylsp = {
+                        plugins = {
+                            pycodestyle = {
+                                maxLineLength = 120,
+                            }
+                        }
+                    }
+                }
+            })
             lspconfig["lua_ls"].setup({
                 settings = {
                     Lua = {
@@ -272,6 +317,9 @@ local plugins = {
                     },
                 },
             })
+            lspconfig["ts_ls"].setup({})
+            lspconfig["eslint"].setup({})
+            lspconfig["eslint"].setup({})
             vim.keymap.set("n", "<leader>F", vim.lsp.buf.format)
             vim.keymap.set("n", "gD", vim.lsp.buf.declaration)
             vim.keymap.set("n", "gd", vim.lsp.buf.definition)
@@ -298,5 +346,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   })
 end
 vim.opt.rtp:prepend(lazypath)
+
 
 require("lazy").setup(plugins, {})
