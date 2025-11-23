@@ -1,0 +1,22 @@
+[window]
+opacity = 0.9
+
+[font]
+size = 10.0
+
+[font.normal]
+family = "JetBrainsMonoNerdFont"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMonoNerdFont"
+style = "Bold"
+
+[font.italic]
+family = "JetBrainsMonoNerdFont"
+style = "Italic"
+
+[font.bold_italic]
+family = "JetBrainsMonoNerdFont"
+style = "Bold Italic"
+
